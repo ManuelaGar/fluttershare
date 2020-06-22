@@ -19,7 +19,7 @@ dependencies:
   firebase_storage: ^3.1.6
   flutter_svg:
   geolocator: ^5.3.2+2
-  google_sign_in: ^4.5.1
+  google_sign_in: ^4.0.4
   image: ^2.1.12
   image_picker: ^0.6.7+2
   path_provider: ^1.6.11
@@ -31,5 +31,14 @@ dev_dependencies:
     sdk: flutter
 
 flutter:
-
   uses-material-design: true
+  fonts:
+    - family: Signatra
+      fonts:
+        - asset: assets/fonts/Signatra.ttf
+  assets:
+    - assets/images/google_signin_button.png
+    - assets/images/upload.svg
+    - assets/images/search.svg
+    - assets/images/activity_feed.svg
+    - assets/images/no_content.svg
