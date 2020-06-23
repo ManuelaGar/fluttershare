@@ -11,6 +11,8 @@ class Timeline extends StatefulWidget {
 }
 
 class _TimelineState extends State<Timeline> {
+  List<dynamic> users = [];
+
   @override
   void initState() {
     getUsers();
@@ -19,9 +21,11 @@ class _TimelineState extends State<Timeline> {
   }
 
   getUsers() async {
-    final QuerySnapshot snapshot = await usersRef.limit(2).getDocuments();
+    final QuerySnapshot snapshot = await usersRef.getDocuments();
     snapshot.documents.forEach((DocumentSnapshot doc) {
-      print(doc.data);
+      setState(() {
+        users = snapshot.documents;
+      });
     });
   }
 
@@ -37,7 +41,15 @@ class _TimelineState extends State<Timeline> {
   Widget build(context) {
     return Scaffold(
       appBar: header(context, isAppTitle: true),
-      body: Text('Timeline'),
+      body: Container(
+        child: ListView(
+          children: users
+              .map(
+                (user) => Text(user['username']),
+              )
+              .toList(),
+        ),
+      ),
     );
   }
 }
