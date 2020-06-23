@@ -20,8 +20,10 @@ class _TimelineState extends State<Timeline> {
 
   getUsers() async {
     final QuerySnapshot snapshot = await usersRef
-        .where('postsCount', isGreaterThan: 2)
-        .where('username', isEqualTo: 'Jane')
+        .orderBy(
+          'postsCount',
+          descending: false,
+        )
         .getDocuments();
     snapshot.documents.forEach((DocumentSnapshot doc) {
       print(doc.data);
