@@ -19,7 +19,7 @@ dependencies:
   firebase_storage: ^3.1.6
   flutter_svg:
   geolocator: ^5.3.2+2
-  google_sign_in: ^4.0.4
+  google_sign_in: ^4.0.1+1
   image: ^2.1.12
   image_picker: ^0.6.7+2
   path_provider: ^1.6.11
