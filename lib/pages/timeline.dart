@@ -14,12 +14,15 @@ class _TimelineState extends State<Timeline> {
   @override
   void initState() {
     getUsers();
-    getUserById();
+    //getUserById();
     super.initState();
   }
 
   getUsers() async {
-    final QuerySnapshot snapshot = await usersRef.getDocuments();
+    final QuerySnapshot snapshot = await usersRef
+        .where('postsCount', isGreaterThan: 2)
+        .where('username', isEqualTo: 'Jane')
+        .getDocuments();
     snapshot.documents.forEach((DocumentSnapshot doc) {
       print(doc.data);
     });
