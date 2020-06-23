@@ -14,15 +14,23 @@ class _TimelineState extends State<Timeline> {
   @override
   void initState() {
     getUsers();
+    getUserById();
     super.initState();
   }
 
-  getUsers() {
-    usersRef.getDocuments().then((QuerySnapshot snapshot) {
-      snapshot.documents.forEach((DocumentSnapshot doc) {
-        print(doc.data);
-      });
+  getUsers() async {
+    final QuerySnapshot snapshot = await usersRef.getDocuments();
+    snapshot.documents.forEach((DocumentSnapshot doc) {
+      print(doc.data);
     });
+  }
+
+  getUserById() async {
+    final String id = 'acpWvsL2tG6ZQTYuxqSL';
+    final DocumentSnapshot doc = await usersRef.document(id).get();
+    print(doc.data);
+    print(doc.documentID);
+    print(doc.exists);
   }
 
   @override
