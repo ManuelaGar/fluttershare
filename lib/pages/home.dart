@@ -77,7 +77,7 @@ class _HomeState extends State<Home> {
       usersRef.document(user.id).setData({
         'id': user.id,
         'username': username,
-        'photoId': user.photoUrl,
+        'photoUrl': user.photoUrl,
         'email': user.email,
         'displayName': user.displayName,
         'bio': '',
@@ -207,19 +207,3 @@ class _HomeState extends State<Home> {
     return isAuth ? buildAuthScreen() : buildUnAuthScreen();
   }
 }
-
-/*animator: 0.1.4
-cached_network_image:
-cloud_firestore: ^0.9.7+2
-cupertino_icons: ^0.1.2
-firebase_auth: ^0.8.3
-firebase_messaging: ^4.0.0+1
-firebase_storage: ^2.1.0+1
-flutter_svg:
-google_sign_in: ^4.0.1+1
-geolocator: 5.0.1
-image: ^2.0.7
-image_picker: ^0.6.0+2
-path_provider: ^0.5.0+1
-timeago: 2.0.17
-uuid: ^2.0.0*/
