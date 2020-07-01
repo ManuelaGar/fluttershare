@@ -7,6 +7,7 @@ import 'package:fluttershare/pages/home.dart';
 import 'package:fluttershare/widgets/progress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as Im;
+import 'package:geolocator/geolocator.dart';
 
 import 'package:fluttershare/models/user.dart';
 import 'package:path_provider/path_provider.dart';
@@ -127,7 +128,22 @@ class _UploadState extends State<Upload> {
   }
 
   createPostInFirestore(
-      {String mediaUrl, String location, String description}) {}
+      {String mediaUrl, String location, String description}) {
+    postsRef
+        .document(widget.currentUser.id)
+        .collection('userPosts')
+        .document(postId)
+        .setData({
+      'postId': postId,
+      'ownerId': widget.currentUser.id,
+      'username': widget.currentUser.username,
+      'mediaUrl': mediaUrl,
+      'description': description,
+      'location': location,
+      'timestamp': timestamp,
+      'likes': {},
+    });
+  }
 
   handleSubmit() async {
     setState(() {
@@ -140,6 +156,13 @@ class _UploadState extends State<Upload> {
       location: locationController.text,
       description: captionController.text,
     );
+    captionController.clear();
+    locationController.clear();
+    setState(() {
+      file = null;
+      isUploading = false;
+      postId = Uuid().v4();
+    });
   }
 
   Scaffold buildUploadForm() {
@@ -239,7 +262,7 @@ class _UploadState extends State<Upload> {
                 borderRadius: BorderRadius.circular(30.0),
               ),
               color: Colors.blue,
-              onPressed: () => print('get user location'),
+              onPressed: getUserLocation,
               icon: Icon(
                 Icons.my_location,
                 color: Colors.white,
@@ -249,6 +272,16 @@ class _UploadState extends State<Upload> {
         ],
       ),
     );
+  }
+
+  getUserLocation() async {
+    Position position = await Geolocator()
+        .getCurrentPosition(desiredAccuracy: LocationAccuracy.high);
+    List<Placemark> placemarks = await Geolocator()
+        .placemarkFromCoordinates(position.latitude, position.longitude);
+    Placemark placemark = placemarks[0];
+    String formattedAddress = '${placemark.locality}, ${placemark.country}';
+    locationController.text = formattedAddress;
   }
 
   @override
