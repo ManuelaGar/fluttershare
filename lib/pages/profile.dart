@@ -118,6 +118,8 @@ class _ProfileState extends State<Profile> {
     bool isProfileOwner = currentUserId == widget.profileId;
     if (isProfileOwner) {
       return buildButton(text: 'Edit Profile', onPressed: editProfile);
+    } else {
+      return Text('');
     }
   }
 
