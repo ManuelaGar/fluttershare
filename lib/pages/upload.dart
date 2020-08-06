@@ -3,15 +3,15 @@ import 'package:cached_network_image/cached_network_image.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/flutter_svg.dart';
-import 'package:fluttershare/pages/home.dart';
-import 'package:fluttershare/widgets/progress.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:image/image.dart' as Im;
 import 'package:geolocator/geolocator.dart';
-
-import 'package:fluttershare/models/user.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:uuid/uuid.dart';
+
+import 'package:fluttershare/models/user.dart';
+import 'package:fluttershare/pages/home.dart';
+import 'package:fluttershare/widgets/progress.dart';
 
 class Upload extends StatefulWidget {
   Upload({this.currentUser});
@@ -21,7 +21,8 @@ class Upload extends StatefulWidget {
   _UploadState createState() => _UploadState();
 }
 
-class _UploadState extends State<Upload> {
+class _UploadState extends State<Upload>
+    with AutomaticKeepAliveClientMixin<Upload> {
   TextEditingController captionController = TextEditingController();
   TextEditingController locationController = TextEditingController();
   File file;
@@ -131,17 +132,17 @@ class _UploadState extends State<Upload> {
       {String mediaUrl, String location, String description}) {
     postsRef
         .document(widget.currentUser.id)
-        .collection('userPosts')
+        .collection("userPosts")
         .document(postId)
         .setData({
-      'postId': postId,
-      'ownerId': widget.currentUser.id,
-      'username': widget.currentUser.username,
-      'mediaUrl': mediaUrl,
-      'description': description,
-      'location': location,
-      'timestamp': timestamp,
-      'likes': {},
+      "postId": postId,
+      "ownerId": widget.currentUser.id,
+      "username": widget.currentUser.username,
+      "mediaUrl": mediaUrl,
+      "description": description,
+      "location": location,
+      "timestamp": DateTime.now(),
+      "likes": {},
     });
   }
 
@@ -284,8 +285,11 @@ class _UploadState extends State<Upload> {
     locationController.text = formattedAddress;
   }
 
+  bool get wantKeepAlive => true;
+
   @override
   Widget build(BuildContext context) {
+    super.build(context);
     return file == null ? buildSplashScreen() : buildUploadForm();
   }
 }

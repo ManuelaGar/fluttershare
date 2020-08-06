@@ -1,4 +1,6 @@
+import 'dart:io';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -19,6 +21,7 @@ final commentsRef = Firestore.instance.collection('comments');
 final activityFeedRef = Firestore.instance.collection('feed');
 final followersRef = Firestore.instance.collection('followers');
 final followingRef = Firestore.instance.collection('following');
+final timelineRef = Firestore.instance.collection('timeline');
 final StorageReference storageRef = FirebaseStorage.instance.ref();
 final DateTime timestamp = DateTime.now();
 User currentUser;
@@ -29,6 +32,8 @@ class Home extends StatefulWidget {
 }
 
 class _HomeState extends State<Home> {
+  final _scaffoldKey = GlobalKey<ScaffoldState>();
+  FirebaseMessaging _firebaseMessaging = FirebaseMessaging();
   bool isAuth = false;
   PageController pageController;
   int pageIndex = 0;
@@ -40,31 +45,62 @@ class _HomeState extends State<Home> {
     //Detects when user signed in
     googleSignIn.onCurrentUserChanged.listen((account) {
       handleSignIn(account);
-    }, onError: (err) {
-      print('Error signing in: $err');
-    });
+    }, onError: (err) {});
 
     //Reauthenticate user when app is opened
     googleSignIn.signInSilently(suppressErrors: false).then((account) {
       handleSignIn(account);
-    }, onError: (err) {
-      print('Error silently signing in: $err');
-    });
+    }, onError: (err) {});
 
     pageController = PageController();
   }
 
-  handleSignIn(GoogleSignInAccount account) {
+  handleSignIn(GoogleSignInAccount account) async {
     if (account != null) {
-      createUserInFirestore();
+      await createUserInFirestore();
       setState(() {
         isAuth = true;
       });
+      configurePushNotifications();
     } else {
       setState(() {
         isAuth = false;
       });
     }
+  }
+
+  configurePushNotifications() {
+    final GoogleSignInAccount user = googleSignIn.currentUser;
+    if (Platform.isIOS) getIOSPermission();
+
+    _firebaseMessaging.getToken().then((token) {
+      usersRef
+          .document(user.id)
+          .updateData({'androidNotificationToken': token});
+    });
+
+    _firebaseMessaging.configure(
+      onMessage: (Map<String, dynamic> message) async {
+        final String recipientId = message['data']['recipient'];
+        final String body = message['notification']['body'];
+
+        if (recipientId == user.id) {
+          SnackBar snackbar = SnackBar(
+            content: Text(
+              body,
+              overflow: TextOverflow.ellipsis,
+            ),
+          );
+          _scaffoldKey.currentState.showSnackBar(snackbar);
+        }
+      },
+    );
+  }
+
+  getIOSPermission() {
+    _firebaseMessaging.requestNotificationPermissions(
+        IosNotificationSettings(alert: true, sound: true, badge: true));
+    _firebaseMessaging.onIosSettingsRegistered.listen((settings) {});
   }
 
   @override
@@ -90,6 +126,13 @@ class _HomeState extends State<Home> {
         'bio': '',
         'timestamp': timestamp,
       });
+      // Make new user their own follower (to include their posts in their timeline)
+
+      await followersRef
+          .document(user.id)
+          .collection('userFollowers')
+          .document(user.id)
+          .setData({});
 
       doc = await usersRef.document(user.id).get();
     }
@@ -120,13 +163,10 @@ class _HomeState extends State<Home> {
 
   Scaffold buildAuthScreen() {
     return Scaffold(
+      key: _scaffoldKey,
       body: PageView(
         children: <Widget>[
-          //Timeline(),
-          RaisedButton(
-            child: Text('Log out'),
-            onPressed: logout,
-          ),
+          Timeline(currentUser: currentUser),
           ActivityFeed(),
           Upload(currentUser: currentUser),
           Search(),
